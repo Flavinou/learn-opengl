@@ -108,21 +108,33 @@ int main(void)
     std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
 
     /* Define 3 vertices as an array of floats that will make up a triangle once linked together */
-    float positions[6] = {
-       -0.5f, -0.5f,
-        0.0f,  0.5f,
-        0.5f, -0.5f
+    float positions[] = {
+       -0.5f, -0.5f, // 0
+        0.5f, -0.5f, // 1
+        0.5f,  0.5f, // 2
+       -0.5f,  0.5f  // 3
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
     };
 
     /* Tell OpenGL that we need to store these positions as an array and select them to be drawn on screen */
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 
     /* Tell OpenGL how the vertices are laid out */
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    /* Tell OpenGL that we want to re-use "redundant" vertex information by telling it the indices of the vertex we want to draw */
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(float), indices, GL_STATIC_DRAW);
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
@@ -135,7 +147,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* Supposedly draw a triangle BUT how the memory is laid out is still missing, OpenGL doesn't know how to render those vertices yet */
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -144,7 +156,7 @@ int main(void)
         glfwPollEvents();
     }
 
-    //glDeleteProgram(shader);
+    glDeleteProgram(shader);
 
     glfwTerminate();
     return 0;
