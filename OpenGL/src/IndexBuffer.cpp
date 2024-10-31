@@ -3,7 +3,7 @@
 #include "Core.h"
 
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
-    : m_Count(count)
+    : m_RendererID(0), m_Count(count)
 {
     ASSERT(sizeof(unsigned int) == sizeof(GLuint));
 
