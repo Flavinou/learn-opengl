@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "Renderer.h"
+#include "Core.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
