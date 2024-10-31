@@ -10,6 +10,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Texture.h"
 
 int main()
 {
@@ -44,10 +45,10 @@ int main()
     {
         /* Define 3 vertices as an array of floats that will make up a triangle once linked together */
         float positions[] = {
-           -0.5f, -0.5f, // 0
-            0.5f, -0.5f, // 1
-            0.5f,  0.5f, // 2
-           -0.5f,  0.5f  // 3
+           -0.5f, -0.5f, 0.0f, 0.0f, // 0
+            0.5f, -0.5f, 1.0f, 0.0f, // 1
+            0.5f,  0.5f, 1.0f, 1.0f, // 2
+           -0.5f,  0.5f, 0.0f, 1.0f  // 3
         };
 
         unsigned int indices[] = {
@@ -55,13 +56,18 @@ int main()
             2, 3, 0
         };
 
+        /* By default, OpenGL does not consider source alpha so enable and set blend mode to consider it */
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         /* Tell OpenGL how the vertices are going to be laid out */
         VertexArray va;
 
         /* Tell OpenGL that we need to store these positions as an array and select them to be drawn on screen */
-        VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+        VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
         VertexBufferLayout layout;
+        layout.Push<float>(2);
         layout.Push<float>(2);
         va.AddBuffer(vb, layout);
 
@@ -71,6 +77,10 @@ int main()
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+        Texture texture("res/textures/GamesXboxHubAppList.scale-200_contrast-high.png");
+        texture.Bind();
+        shader.SetUniform1i("u_Texture", 0);
 
         va.Unbind();
         ib.Unbind();
