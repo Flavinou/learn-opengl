@@ -13,7 +13,8 @@
 #include "Texture.h"
 
 #include "glm/glm.hpp"
-#include "glm/ext/matrix_clip_space.hpp" // glm::translate, glm::rotate, glm::scale
+#include "glm/ext/matrix_clip_space.hpp" // glm::ortho
+#include "glm/ext/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale
 
 int main()
 {
@@ -28,7 +29,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -48,10 +49,10 @@ int main()
     {
         /* Define 3 vertices as an array of floats that will make up a triangle once linked together */
         float positions[] = {
-           -0.5f, -0.5f, 0.0f, 0.0f, // 0
-            0.5f, -0.5f, 1.0f, 0.0f, // 1
-            0.5f,  0.5f, 1.0f, 1.0f, // 2
-           -0.5f,  0.5f, 0.0f, 1.0f  // 3
+           100.5f, 100.5f, 0.0f, 0.0f, // 0
+           200.5f, 100.5f, 1.0f, 0.0f, // 1
+           200.5f, 200.5f, 1.0f, 1.0f, // 2
+           100.5f, 200.5f, 0.0f, 1.0f  // 3
         };
 
         unsigned int indices[] = {
@@ -78,12 +79,15 @@ int main()
         IndexBuffer ib(indices, 6);
 
         /* Projection matrix - map 3D world to 2D screen space - specifying here a 4/3 aspect ratio */
-        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+        glm::mat4 mvp = proj * view * model;
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
+        shader.SetUniformMat4f("u_MVP", mvp);
 
         Texture texture("res/textures/GamesXboxHubAppList.scale-200_contrast-high.png");
         texture.Bind();
