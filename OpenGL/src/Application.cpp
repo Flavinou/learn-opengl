@@ -12,6 +12,9 @@
 #include "Renderer.h"
 #include "Texture.h"
 
+#include "glm/glm.hpp"
+#include "glm/ext/matrix_clip_space.hpp" // glm::translate, glm::rotate, glm::scale
+
 int main()
 {
     GLFWwindow* window;
@@ -74,9 +77,13 @@ int main()
         /* Tell OpenGL that we want to re-use "redundant" vertex information by telling it the indices of the vertex we want to draw */
         IndexBuffer ib(indices, 6);
 
+        /* Projection matrix - map 3D world to 2D screen space - specifying here a 4/3 aspect ratio */
+        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
         Texture texture("res/textures/GamesXboxHubAppList.scale-200_contrast-high.png");
         texture.Bind();
