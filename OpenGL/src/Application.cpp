@@ -16,6 +16,10 @@
 #include "glm/ext/matrix_clip_space.hpp" // glm::ortho
 #include "glm/ext/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 int main()
 {
     GLFWwindow* window;
@@ -81,13 +85,10 @@ int main()
         /* Projection matrix - map 3D world to 2D screen space - specifying here a 4/3 aspect ratio */
         glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
-        glm::mat4 mvp = proj * view * model;
 
         Shader shader("res/shaders/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", mvp);
 
         Texture texture("res/textures/GamesXboxHubAppList.scale-200_contrast-high.png");
         texture.Bind();
@@ -100,16 +101,38 @@ int main()
 
         Renderer renderer;
 
+        /* ImGui - initial setup */
+        ImGui::CreateContext();
+        ImGui::StyleColorsDark();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
         float r = 0.0f;
         float increment = 0.05f;
+
+        glm::vec3 translation = glm::vec3(200, 200, 0);
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
             renderer.Clear();
 
+            /* ImGui - start frame */
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+            glm::mat4 mvp = proj * view * model;
+
             shader.Bind();
             shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+            shader.SetUniformMat4f("u_MVP", mvp);
 
             /* Render triangles from given indices above */
             renderer.Draw(va, ib, shader);
@@ -121,6 +144,17 @@ int main()
 
             r += increment;
 
+            /* ImGui - begin new window */
+            {
+                ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            }
+
+            /* ImGui - draw frame */
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
 
@@ -128,6 +162,11 @@ int main()
             glfwPollEvents();
         }
     }
+
+    /* ImGui - shutdown */
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
