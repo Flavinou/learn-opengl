@@ -4,13 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Core.h"
-
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
 #include "Renderer.h"
-#include "Texture.h"
 
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_clip_space.hpp" // glm::ortho
@@ -21,6 +15,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "tests/TestClearColor.h"
+#include "tests/TestTexture2D.h"
 
 int main()
 {
@@ -65,15 +60,12 @@ int main()
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330");
 
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
         test::Test* currentTest = nullptr;
         test::TestMenu* testMenu = new test::TestMenu(currentTest);
         currentTest = testMenu;
 
         testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+        testMenu->RegisterTest<test::TestTexture2D>("Texture 2D");
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
